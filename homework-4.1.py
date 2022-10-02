@@ -1,4 +1,6 @@
-﻿from vacancies_grabber import grab_hh_vacancy, grab_superjob_vacancy
+# Развернуть у себя на компьютере/виртуальной машине/хостинге MongoDB и 
+# реализовать функцию, которая будет добавлять только новые вакансии/продукты в вашу базу.
+from vacancies_grabber import grab_hh_vacancy, grab_superjob_vacancy
 from pymongo import MongoClient
 
 def grab_vacations_to_db(query, coll):
