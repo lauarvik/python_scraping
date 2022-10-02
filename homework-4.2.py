@@ -1,4 +1,6 @@
-﻿from datetime import datetime
+# * Написать функцию, которая производит поиск и выводит на экран вакансии с заработной платой
+# больше введённой суммы (необходимо анализировать оба поля зарплаты).
+from datetime import datetime
 import requests
 import xmltodict
 from pymongo import MongoClient
