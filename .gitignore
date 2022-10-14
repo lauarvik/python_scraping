@@ -1,3 +1,2 @@
-﻿/images
-/products/__pycache__
-/products/spiders/__pycache__
+﻿images/
+__pycache__/

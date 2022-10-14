@@ -27,8 +27,7 @@ class LeroymerlinSpider(CrawlSpider):
         self.start_urls = [f'https://leroymerlin.ru/search/?q={q}&page=1']
         super().__init__(*a, **kw)
 
-    # TODO:
-    # вынести логику работты в middleware
+    # TODO: вынести логику работы в middleware
     def handle_401_error(self, response:HtmlResponse):
         #чтобы не импортировать значение cookie qrator_jsid из браузера (для обхода защиты CSRF от QRATOR) попробуем получить её самостоятельно
         import requests
@@ -67,6 +66,7 @@ class LeroymerlinSpider(CrawlSpider):
         if response.status == 401:
             self.logger.info('Неожиданное появление кода 401, попробуем переинициализировать QRATOR')
             return self.handle_401_error(response)
+
         loader = ProductsLoader(item=ProductsItem(), response=response)
         loader.add_value('url', response.url)
         loader.add_css('name', 'h1 ::text')
@@ -74,4 +74,3 @@ class LeroymerlinSpider(CrawlSpider):
         loader.add_css('images', 'picture[slot] img::attr(src)')
         loader.add_css('characteristics','#characteristics dl ::text')
         return loader.load_item()
-
