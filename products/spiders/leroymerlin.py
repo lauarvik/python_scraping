@@ -1,8 +1,7 @@
 import re
-from scrapy.http import Request
+from scrapy.http import Request, HtmlResponse
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
-from scrapy.http import HtmlResponse
 from products.items import ProductsItem, ProductsLoader
 from urllib.parse import urlparse
 
@@ -16,7 +15,6 @@ class LeroymerlinSpider(CrawlSpider):
     custom_settings = {
         'DOWNLOAD_DELAY': 1.25,
         'CONCURRENT_REQUESTS':  4,
-        'LOG_LEVEL_OTHERS': 'WARNING',
     }
 
     rules = (
@@ -27,9 +25,10 @@ class LeroymerlinSpider(CrawlSpider):
     def __init__(self, *a, **kw):
         q = kw.get('q', 'удиви меня')
         self.start_urls = [f'https://leroymerlin.ru/search/?q={q}&page=1']
-        print(kw)
         super().__init__(*a, **kw)
 
+    # TODO:
+    # вынести логику работты в middleware
     def handle_401_error(self, response:HtmlResponse):
         #чтобы не импортировать значение cookie qrator_jsid из браузера (для обхода защиты CSRF от QRATOR) попробуем получить её самостоятельно
         import requests
@@ -46,24 +45,23 @@ class LeroymerlinSpider(CrawlSpider):
                         print('.', end='', flush=True)
                     pow += 1
                     url = f'{p.scheme}://{p.netloc}/__qrator/validate?pow={pow}&nonce={nonce}&qsessid={qsessid}'
-                    r = session.post(url, json={}, verify=True)
+                    r = session.post(url, json={})
                     if (status := r.status_code) == 200: break
                 else:
                     self.logger.error(f'Перебор pow завершился ничем. status: {status}')
                     return
                 print()
                 cookie = r.headers.get('Set-Cookie')
-                if match := re.search(r'(qrator_jsid)=(.+)$', str(cookie)):
+                if match := re.search(r'(qrator_jsid)=(.+)', str(cookie)):
                     _, qrator_jsid = match.groups()
                     self.logger.info(f'Значение найдено: pow={pow}, qrator_jsid={qrator_jsid}')
-                    return Request(response.url, cookies={'qrator_jsid': qrator_jsid})
+                    return Request(response.url, cookies=dict(qrator_jsid=qrator_jsid))
         
         self.logger.error('Что-то пошло не так, кука qrator_jsid не найдена.')
     
     def parse_start_url(self, response:HtmlResponse, **kwargs):
         if response.status == 401:
             return self.handle_401_error(response)
-        #return response
 
     def parse_item(self, response:HtmlResponse):
         if response.status == 401:
@@ -75,6 +73,5 @@ class LeroymerlinSpider(CrawlSpider):
         loader.add_css('price', 'span[slot="price"]::text')
         loader.add_css('images', 'picture[slot] img::attr(src)')
         loader.add_css('characteristics','#characteristics dl ::text')
-
         return loader.load_item()
 

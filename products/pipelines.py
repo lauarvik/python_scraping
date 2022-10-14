@@ -5,12 +5,11 @@
 
 
 # useful for handling different item types with a single interface
-import hashlib, re, os.path
+import re, os.path
 from itemadapter import ItemAdapter
 from scrapy.pipelines.images import ImagesPipeline
 from scrapy import Request
 from scrapy.spiders import Spider
-from scrapy.utils.python import to_bytes
 from scrapy.exceptions import DropItem
 import pymongo
 
@@ -64,6 +63,6 @@ class ProductsImagesPipeline(ImagesPipeline):
             parts = item['url'].split('/')
             dir = parts[-1] if parts[-1] else parts[-2]
         except Exception as e:
-           dir = ''
+            dir = ''
         
         return os.path.join(dir, os.path.basename(request.url))

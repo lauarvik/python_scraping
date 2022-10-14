@@ -15,13 +15,13 @@ def process_price(value):
         return value
 
 def process_characteristics(value):
-    if len(value) % 2:
-        return value
-    
     result = {}
-    while value:
-        result |= {value.pop(0): value.pop(0)}
-    
+    backup = value.copy()
+    try:
+        while value: result |= {value.pop(0): value.pop(0)}
+    except:
+        result = backup
+
     return result
 
 class ProductsItem(Item):

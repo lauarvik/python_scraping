@@ -4,7 +4,7 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals, Spider
-from scrapy.http.response import Response
+from scrapy.http import Request, HtmlResponse
 
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
@@ -22,14 +22,14 @@ class ProductsSpiderMiddleware:
         crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
         return s
 
-    def process_spider_input(self, response, spider):
+    def process_spider_input(self, response:HtmlResponse, spider):
         # Called for each response that goes through the spider
         # middleware and into the spider.
 
         # Should return None or raise an exception.
         return None
 
-    def process_spider_output(self, response:Response, result, spider:Spider):
+    def process_spider_output(self, response:HtmlResponse, result, spider:Spider):
         # Called with the results returned from the Spider, after
         # it has processed the response.
 
@@ -37,7 +37,7 @@ class ProductsSpiderMiddleware:
         for i in result:
             yield i
 
-    def process_spider_exception(self, response:Response, exception, spider):
+    def process_spider_exception(self, response:HtmlResponse, exception, spider):
         # Called when a spider or process_spider_input() method
         # (from other spider middleware) raises an exception.
 
@@ -81,7 +81,7 @@ class ProductsDownloaderMiddleware:
         #   installed downloader middleware will be called
         return None
 
-    def process_response(self, request, response, spider):
+    def process_response(self, request, response:HtmlResponse, spider):
         # Called with the response returned from the downloader.
 
         # Must either;
@@ -90,7 +90,7 @@ class ProductsDownloaderMiddleware:
         # - or raise IgnoreRequest
         return response
 
-    def process_exception(self, request, exception, spider):
+    def process_exception(self, request, exception, spider:Spider):
         # Called when a download handler or a process_request()
         # (from other downloader middleware) raises an exception.
 
@@ -100,5 +100,5 @@ class ProductsDownloaderMiddleware:
         # - return a Request object: stops process_exception() chain
         pass
 
-    def spider_opened(self, spider):
+    def spider_opened(self, spider:Spider):
         spider.logger.info('Spider opened: %s' % spider.name)
