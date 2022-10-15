@@ -94,7 +94,6 @@ class ProductsDownloaderMiddleware:
         # - return a Request object
         # - or raise IgnoreRequest
         if response.status == 401:
-            spider.logger.info('cookies: %s, state: %s' % (request.cookies, spider.state.get('cookies')))
             from urllib.parse import urlparse
             p = urlparse(response.url)
             if not p.netloc in ['leroymerlin.ru']:
