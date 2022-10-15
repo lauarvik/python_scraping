@@ -1,4 +1,3 @@
-import re
 from scrapy.http import Request, HtmlResponse
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
