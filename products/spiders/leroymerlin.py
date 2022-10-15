@@ -19,9 +19,8 @@ class LeroymerlinSpider(CrawlSpider):
 
     def __init__(self, *a, **kw):
         q = kw.get('q', 'удиви меня')
-        self.start_urls = [f'https://leroymerlin.ru/search/?q={q}&page=1']
+        self.start_urls = ['https://leroymerlin.ru/search/?q=%s&page=1' % q]
         super().__init__(*a, **kw)
-        self.cookie = {}
 
     def parse_item(self, response:HtmlResponse):
         loader = ProductsLoader(item=ProductsItem(), response=response)
