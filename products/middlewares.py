@@ -82,8 +82,8 @@ class ProductsDownloaderMiddleware:
         #   installed downloader middleware will be called
         if hasattr(spider, 'state'):
             cookies = spider.state.get('cookies')
-            if cookies and request.cookies != cookies:
-                request.cookies = cookies
+            if cookies and request.cookies.get('qrator_jsid') != cookies.get('qrator_jsid'):
+                request.cookies['qrator_jsid'] = cookies.get('qrator_jsid')
         return None
 
     def process_response(self, request:Request, response:HtmlResponse, spider:Spider):
@@ -101,35 +101,39 @@ class ProductsDownloaderMiddleware:
 
             import requests, re
             if cookie := response.headers.get('Set-Cookie'):
-                if match := re.search(r'qrator_jsr=(\d+\.\d+\..+?)-(.+?)-', cookie.decode('utf-8')):
+                if match := re.search(r'qrator_jsr=(\d+\.\d+\..+?)-(.+?)-', str(cookie)):
                     nonce, qsessid = match.groups()
                     spider.logger.info('Подбор знаничения pow')
                     session = requests.Session()
                     pow = 0
                     status = 403
-                    while status == 403 and pow < 1024:
+                    while status == 403 and pow < 1280:
                         if not pow % 10:
                             print('.', end='', flush=True)
 
                         pow += 1
-                        url = f'{p.scheme}://{p.netloc}/__qrator/validate?pow={pow}&nonce={nonce}&qsessid={qsessid}'
+                        url = '%s://%s/__qrator/validate?pow=%s&nonce=%s&qsessid=%s' % (p.scheme, p.netloc, pow, nonce, qsessid)
                         r = session.post(url, json={})
                         if (status := r.status_code) == 200: break
 
                     else:
-                        spider.logger.error(f'Перебор pow завершился ничем. status: {status}')
+                        print()
+                        spider.logger.error('Перебор pow завершился ничем. [%s]' % status)
                         return response
                     
                     print()
                     cookie = r.headers.get('Set-Cookie')
                     if match := re.search(r'(qrator_jsid)=(.+)', str(cookie)):
                         _, qrator_jsid = match.groups()
-                        spider.logger.info(f'Значение найдено: pow={pow}, qrator_jsid={qrator_jsid}')
-                        cookies = dict(qrator_jsid=qrator_jsid)
+                        spider.logger.info('Значение найдено: pow=%s, qrator_jsid=%s' % (pow, qrator_jsid))
+                        cookie = dict(qrator_jsid=qrator_jsid)
                         if hasattr(spider, 'state'):
-                            spider.state['cookies'] = cookies
+                            if not isinstance(spider.state.get('cookies'), dict):
+                                spider.state['cookies'] = {}
+                            
+                            spider.state['cookies'].update(cookie)
 
-                        return response.follow(response.url, cookies=cookies)
+                        return response.follow(response.url, cookies=request.cookies.update(cookie))
 
         return response
 
