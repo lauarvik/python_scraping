@@ -100,8 +100,9 @@ class ProductsDownloaderMiddleware:
                 return response
 
             import requests, re
-            if cookie := response.headers.get('Set-Cookie'):
-                if match := re.search(r'qrator_jsr=(\d+\.\d+\..+?)-(.+?)-', str(cookie)):
+            cookies = response.headers.getlist('Set-Cookie')
+            for coo in cookies:
+                if match := re.match('qrator_jsr=(.+?)-(.+?)-', coo.decode('utf-8')):
                     nonce, qsessid = match.groups()
                     spider.logger.info('Подбор знаничения pow')
                     session = requests.Session()
@@ -122,18 +123,16 @@ class ProductsDownloaderMiddleware:
                         return response
                     
                     print()
-                    cookie = r.headers.get('Set-Cookie')
-                    if match := re.search(r'(qrator_jsid)=(.+)', str(cookie)):
-                        _, qrator_jsid = match.groups()
+                    cookies = r.cookies.get_dict()
+                    if qrator_jsid := cookies.get('qrator_jsid'):
                         spider.logger.info('Значение найдено: pow=%s, qrator_jsid=%s' % (pow, qrator_jsid))
-                        cookie = dict(qrator_jsid=qrator_jsid)
                         if hasattr(spider, 'state'):
                             if not isinstance(spider.state.get('cookies'), dict):
                                 spider.state['cookies'] = {}
                             
-                            spider.state['cookies'].update(cookie)
+                            spider.state['cookies'].update(cookies)
 
-                        return response.follow(response.url, cookies=request.cookies.update(cookie))
+                        return response.follow(response.url, cookies=request.cookies.update(cookies))
 
         return response
 

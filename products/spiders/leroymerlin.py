@@ -18,6 +18,7 @@ class LeroymerlinSpider(CrawlSpider):
     )
 
     def __init__(self, *a, **kw):
+        self.logger.info("Параметры запуска: %s" % kw)
         q = kw.get('q', 'удиви меня')
         self.start_urls = ['https://leroymerlin.ru/search/?q=%s&page=1' % q]
         super().__init__(*a, **kw)
