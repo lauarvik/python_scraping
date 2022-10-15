@@ -26,29 +26,22 @@ class ProductsSpiderMiddleware:
     def process_spider_input(self, response:HtmlResponse, spider):
         # Called for each response that goes through the spider
         # middleware and into the spider.
-        spider.logger.info('MIDDLEWARE: process_spider_input, %s' % response.status)
-        if response.status == 401:
-            #spider.logger.info('MIDDLEWARE: %s' % response.request.cookies)
-            #spider.logger.info('MIDDLEWARE: %s' % spider.state.get('cookies'))
-            #response.request.cookies = spider.state.get('cookies')
-            raise Exception('MIDDLEWARE: не пропущу')
-            #pass
+
         # Should return None or raise an exception.
         return None
 
     def process_spider_output(self, response:HtmlResponse, result, spider:Spider):
         # Called with the results returned from the Spider, after
         # it has processed the response.
-        spider.logger.info('MIDDLEWARE: process_spider_output, %s' % response.status)
+
         # Must return an iterable of Request, or item objects.
         for i in result:
-            spider.logger.info('MIDDLEWARE: result = %s' % i)
             yield i
 
     def process_spider_exception(self, response:HtmlResponse, exception, spider):
         # Called when a spider or process_spider_input() method
         # (from other spider middleware) raises an exception.
-        spider.logger.info('MIDDLEWARE: process_spider_exception')
+
         # Should return either None or an iterable of Request or item objects.
         pass
 
@@ -56,7 +49,7 @@ class ProductsSpiderMiddleware:
         # Called with the start requests of the spider, and works
         # similarly to the process_spider_output() method, except
         # that it doesn’t have a response associated.
-        spider.logger.info('MIDDLEWARE: process_start_requests')
+
         # Must return only requests (not items).
         for r in start_requests:
             yield r
