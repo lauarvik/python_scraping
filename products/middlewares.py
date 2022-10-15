@@ -133,6 +133,7 @@ class ProductsDownloaderMiddleware:
                             spider.state['cookies'].update(cookies)
 
                         return response.follow(response.url, cookies=request.cookies.update(cookies))
+                    #break # for coo in cookies:
 
         return response
 
