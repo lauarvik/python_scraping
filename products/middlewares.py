@@ -80,9 +80,9 @@ class ProductsDownloaderMiddleware:
         # - or return a Request object
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
-        if hasattr(spider, 'state'):
+        if hasattr(spider, 'state') and isinstance(spider.state, dict):
             cookies = spider.state.get('cookies')
-            if cookies and request.cookies.get('qrator_jsid') != cookies.get('qrator_jsid'):
+            if isinstance(cookies, dict) and cookies and cookies.get('qrator_jsid') != request.cookies.get('qrator_jsid'):
                 request.cookies['qrator_jsid'] = cookies.get('qrator_jsid')
         return None
 
@@ -126,11 +126,13 @@ class ProductsDownloaderMiddleware:
                     cookies = r.cookies.get_dict()
                     if qrator_jsid := cookies.get('qrator_jsid'):
                         spider.logger.info('Значение найдено: pow=%s, qrator_jsid=%s' % (pow, qrator_jsid))
-                        if hasattr(spider, 'state'):
-                            if not isinstance(spider.state.get('cookies'), dict):
-                                spider.state['cookies'] = {}
-                            
-                            spider.state['cookies'].update(cookies)
+                        if not (hasattr(spider, 'state') and isinstance(spider.state, dict)):
+                            spider.state = {}
+                        
+                        if not isinstance(spider.state.get('cookies'), dict):
+                            spider.state['cookies'] = {}
+                        
+                        spider.state['cookies'].update(cookies)
 
                         return response.follow(response.url, cookies=request.cookies.update(cookies))
                     #break # for coo in cookies:
