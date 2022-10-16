@@ -30,4 +30,4 @@ class LeroymerlinSpider(CrawlSpider):
         loader.add_css('price', 'span[slot="price"]::text')
         loader.add_css('images', 'picture[slot] img::attr(src)')
         loader.add_css('characteristics','#characteristics dl ::text')
-        return loader.load_item()
+        yield loader.load_item()
